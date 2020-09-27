@@ -16,7 +16,8 @@ import asyncio
 import configparser
 import os
 from tobrot.helper_funcs.upload_to_tg import upload_to_tg
-from tobrot.helper_funcs.create_compressed_archive import create_archive
+from tobrot.helper_funcs.create_compressed_archive import create_archive, unzip_me, unrar_me, untar_me
+from tobrot.helper_funcs.extract_link_from_message import extract_link
 
 from tobrot import (
     ARIA_TWO_STARTED_PORT,
@@ -134,7 +135,13 @@ async def fake_etairporpa_call(
     incoming_link,
     c_file_name,
     sent_message_to_update_tg_p,
-    r_clone_header_xedni
+    r_clone_header_xedni,
+    is_zip,
+    cstom_file_name,
+    is_unzip,
+    is_unrar,
+    is_untar,
+    user_message
 ):
     # TODO: duplicate code -_-
     if incoming_link.lower().startswith("magnet:"):
@@ -171,6 +178,53 @@ async def fake_etairporpa_call(
     file = aria_instance.get_download(err_message)
     to_upload_file = file.name
     #
+    if is_zip:
+        # first check if current free space allows this
+        # ref: https://github.com/out386/aria-telegram-mirror-bot/blob/master/src/download_tools/aria-tools.ts#L194
+        # archive the contents
+        check_if_file = await create_archive(to_upload_file)
+        if check_if_file is not None:
+            to_upload_file = check_if_file
+    #
+    if is_unzip:
+        check_ifi_file = await unzip_me(to_upload_file)
+        if check_ifi_file is not None:
+            to_upload_file = check_ifi_file
+    #
+    if is_unrar:
+        check_ife_file = await unrar_me(to_upload_file)
+        if check_ife_file is not None:
+            to_upload_file = check_ife_file
+    #
+    if is_untar:
+        check_ify_file = await untar_me(to_upload_file)
+        if check_ify_file is not None:
+            to_upload_file = check_ify_file
+    #
+    if to_upload_file:
+        if CUSTOM_FILE_NAME:
+            os.rename(to_upload_file, f"{CUSTOM_FILE_NAME}{to_upload_file}")
+            to_upload_file = f"{CUSTOM_FILE_NAME}{to_upload_file}"
+        else:
+            to_upload_file = to_upload_file
+
+    if cstom_file_name:
+        os.rename(to_upload_file, cstom_file_name)
+        to_upload_file = cstom_file_name
+    else:
+        to_upload_file = to_upload_file
+    #
+    response = {}
+    LOGGER.info(response)
+    user_id = user_message.from_user.id
+    LOGGER.info(user_id)
+    if com_gau:
+        final_response = await upload_to_gdrive(
+            to_upload_file,
+            sent_message_to_update_tg_p,
+            user_message,
+            user_id
+        )
     r_clone_conf_file = await get_r_clone_config(
         R_CLONE_CONF_URI,
         sent_message_to_update_tg_p._client
