@@ -13,6 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 import os
+import requests
 
 from tobrot import (
     DOWNLOAD_LOCATION
@@ -52,6 +53,60 @@ async def incoming_message_f(client, message):
         reply_markup=rm_,
         disable_web_page_preview=True
     )
+    is_zip = False
+    is_unzip = False
+    is_unrar = False
+    is_untar = False
+    if len(message.command) > 1:
+        if message.command[1] == "archive":
+            is_zip = True
+        elif message.command[1] == "unzip":
+            is_unzip = True
+        elif message.command[1] == "unrar":
+            is_unrar = True
+        elif message.command[1] == "untar":
+            is_untar = True
+    # get link from the incoming message
+    dl_url, cf_name, _, _ = await extract_link(message.reply_to_message, "LEECH")
+    LOGGER.info(dl_url)
+    LOGGER.info(cf_name)
+    if dl_url is not None:
+        await i_m_sefg.edit_text("extracting links")
+        # start the aria2c daemon
+        aria_i_p = await aria_start()
+        LOGGER.info(aria_i_p)
+        current_user_id = message.from_user.id
+        # create an unique directory
+        new_download_location = os.path.join(
+            DOWNLOAD_LOCATION,
+            str(current_user_id),
+            str(time.time())
+        )
+        # create download directory, if not exist
+        if not os.path.isdir(new_download_location):
+            os.makedirs(new_download_location)
+        await i_m_sefg.edit_text("trying to download")
+        # try to download the "link"
+        sagtus, err_message = await call_apropriate_function(
+            aria_i_p,
+            dl_url,
+            new_download_location,
+            i_m_sefg,
+            is_zip,
+            cf_name,
+            is_unzip,
+            is_unrar,
+            is_untar,
+            message
+        )
+        if not sagtus:
+            # if FAILED, display the error message
+            await i_m_sefg.edit_text(err_message)
+    else:
+        await i_m_sefg.edit_text(
+            "**FCUK**! wat have you entered. \nPlease read /help \n"
+            f"<b>API Error</b>: {cf_name}"
+        )
 
 
 async def incoming_youtube_dl_f(client, message):
