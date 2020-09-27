@@ -1,6 +1,6 @@
 {
   "name": "Telegram Torrent Leecher",
-  "description": "A Telegram Torrent (and youtube-dl) Leecher based on Pyrogram. Powered by @ThankTelegram!",
+  "description": "A Telegram Torrent (and youtube-dl) Leecher based on Pyrogram. Powered by @AiTorrentWare",
   "keywords": [
     "telegram",
     "best",
@@ -14,9 +14,9 @@
     "youtube-dl",
     "leecher"
   ],
-  "repository": "https://github.com/SpEcHiDe/PublicLeech",
-  "success_url": "https://telegram.dog/ThankTelegram",
-  "website": "https://github.com/SpEcHiDe/PublicLeech",
+  "repository": "https://github.com/TMAdminz/Old-PublicLeech",
+  "success_url": "https://telegram.dog/TM_Moviez",
+  "website": "https://github.com/TMAdminz/Old-PublicLeech",
   "env": {
     "ENV": {
       "description": "Setting this to ANYTHING will enable webhooks when in env mode",
